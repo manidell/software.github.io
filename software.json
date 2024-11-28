@@ -63,7 +63,7 @@
     {
         "package": "python",
         "type": "binary",
-        "url": "http://172.48.48.2/packages/Python-3.11.9-built.tar.gz",
+        "url": "http://100.98.236.83/repository/0c0e0eb0-e10b-40c6-a6c5-41db7740d79f/default/a7edc942-e9b1-4649-ab37-964730e3aa0f/v3.11.9/Python-3.11.9-built.tar.gz",
         "version": "v3.11.9"
     },
     {
