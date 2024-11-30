@@ -75,7 +75,7 @@
     {
         "package": "Meta-Llama-3-8B",
         "type": "binary",
-        "url": "http://100.98.236.83/repository/0508938d-dde3-4b06-bc91-fb67d39c3c0d/default/f76ddaf7-6562-45f2-9e58-ba692fa2ca74/latest/Meta-Llama-Model-latest.tar.gz"
+        "url": "http://172.48.48.2/packages/Meta-Llama-Model-latest.tar.gz"
     },
     {
         "package": "alpine",
