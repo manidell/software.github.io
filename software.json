@@ -50,7 +50,7 @@
         "uniqueKey": "vllm-rocm_6f3a2a8bd9a35c412bbf2eeda2a7bd3a9e1cd713f1ec26c870244ada1aca8c1c",
         "url": "100.96.22.23/vllm/vllm-rocm@sha256:6f3a2a8bd9a35c412bbf2eeda2a7bd3a9e1cd713f1ec26c870244ada1aca8c1c",
         "username": "admin",
-        "version": "6f3a2a8bd9a35c412bbf2eeda2a7bd3a9e1cd713f1ec26c870244ada1aca8c1c"
+        "tag": "6f3a2a8bd9a35c412bbf2eeda2a7bd3a9e1cd713f1ec26c870244ada1aca8c1c"
     },	
     {
         "package": "docker.io/bitnami/postgres-exporter",
