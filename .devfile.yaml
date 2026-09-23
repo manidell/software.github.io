@@ -1,0 +1,135 @@
+schemaVersion: 2.2.0
+
+metadata:
+  attributes:
+    metadata-name-field: generateName
+    metadata-name-original-value: remote-workspace
+  name: remote-workspace
+
+attributes:
+  che-theia.eclipse.org/sidecar_policy: mergeImage
+
+components:
+  - name: workspace-container
+    container:
+      image: sno-quay-quay-openshift-operators.apps.ocp420.sol.bdc/keycloak/bubblewrap:latest
+      memoryLimit: 5Gi
+      memoryRequest: 256Mi
+      cpuRequest: 250m
+      cpuLimit: 2000m
+      env:
+        - name: SHELL
+          value: /bin/bash
+        - name: VSCODE_DEFAULT_WORKSPACE
+          value: /home/user
+        - name: KUBEDOCK_ENABLED
+          value: "true"
+        - name: PATH
+          value: /var/tmp/user/bin:/home/user/.nvm/versions/node/v22.23.1/bin:/home/user/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      volumeMounts:
+        - name: user-tmp-volume
+          path: /var/tmp/user
+
+  - name: user-tmp-volume
+    volume: {}
+
+commands:
+  - id: update-ca-trust
+    exec:
+      commandLine: update-ca-trust
+      component: workspace-container
+      workingDir: /
+      group:
+        kind: run
+        isDefault: true
+
+  - id: install-codex
+    exec:
+      commandLine: |
+        set -e
+
+        export NVM_DIR="/home/user/.nvm"
+
+        if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+          curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+        fi
+
+        . "$NVM_DIR/nvm.sh"
+
+        nvm install 22
+        nvm use 22
+        nvm alias default 22
+
+        npm install -g @openai/codex
+        codex --version
+
+        echo "Codex CLI installed successfully."
+      component: workspace-container
+      workingDir: /home/user
+      group:
+        kind: run
+
+  - id: setup-ssh-env
+    exec:
+      commandLine: |
+        set -e
+
+        export NVM_DIR="/home/user/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        nvm use 22 >/dev/null
+
+        mkdir -p /var/tmp/user/bin
+        mkdir -p /home/user/.codex
+
+        node_bin_dir="$(dirname "$(nvm which current)")"
+        codex_bin="$node_bin_dir/codex"
+
+        test -x "$codex_bin"
+
+        # Use a wrapper instead of a symlink so that the Codex app server
+        # uses the persistent home directory.
+        rm -f /var/tmp/user/bin/codex
+
+        printf '%s\n' \
+          '#!/bin/sh' \
+          'export HOME="/home/user"' \
+          'export CODEX_HOME="/home/user/.codex"' \
+          "exec \"$codex_bin\" \"\$@\"" \
+          > /var/tmp/user/bin/codex
+
+        chmod +x /var/tmp/user/bin/codex
+
+        for shell_file in /var/tmp/user/.bashrc /var/tmp/user/.profile; do
+          touch "$shell_file"
+
+          grep -qxF 'export NVM_DIR="/home/user/.nvm"' "$shell_file" ||
+            echo 'export NVM_DIR="/home/user/.nvm"' >> "$shell_file"
+
+          grep -qxF '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' "$shell_file" ||
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> "$shell_file"
+
+          grep -qxF 'export PATH="/var/tmp/user/bin:$PATH"' "$shell_file" ||
+            echo 'export PATH="/var/tmp/user/bin:$PATH"' >> "$shell_file"
+
+          sed -i '\|^cd /projects$|d' "$shell_file"
+          sed -i '\|^cd /home/user$|d' "$shell_file"
+          sed -i '\|^export HOME="/home/user"$|d' "$shell_file"
+
+          echo 'export HOME="/home/user"' >> "$shell_file"
+          echo 'cd /home/user' >> "$shell_file"
+        done
+
+        HOME=/home/user CODEX_HOME=/home/user/.codex \
+          /var/tmp/user/bin/codex --version
+
+        echo "SSH and Codex environment configured."
+      component: workspace-container
+      workingDir: /
+      group:
+        kind: run
+
+events:
+  postStart:
+    - update-ca-trust
+    - install-codex
+    - setup-ssh-env
