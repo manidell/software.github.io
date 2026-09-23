@@ -4,7 +4,7 @@ metadata:
   attributes:
     metadata-name-field: generateName
     metadata-name-original-value: remote-workspace
-  name: remote-workspace
+  name: remote-workspace-ssh
 
 attributes:
   che-theia.eclipse.org/sidecar_policy: mergeImage
