@@ -8,6 +8,7 @@ metadata:
 
 attributes:
   che-theia.eclipse.org/sidecar_policy: mergeImage
+  che-editor: che-incubator/che-code-sshd/latest
 
 components:
   - name: workspace-container
