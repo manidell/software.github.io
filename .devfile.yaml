@@ -12,7 +12,7 @@ attributes:
 components:
   - name: workspace-container
     container:
-      image: sno-quay-quay-openshift-operators.apps.ocp420.sol.bdc/keycloak/bubblewrap:latest
+      image: 172.20.35.210/repository/docker-hosted/bubblewrap-image:latest
       memoryLimit: 5Gi
       memoryRequest: 256Mi
       cpuRequest: 250m
