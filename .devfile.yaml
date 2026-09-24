@@ -26,7 +26,7 @@ components:
         - name: KUBEDOCK_ENABLED
           value: "true"
         - name: PATH
-          value: /var/tmp/user/bin:/home/user/.nvm/versions/node/v22.23.1/bin:/home/user/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          value: /var/tmp/user/bin:/home/user/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       volumeMounts:
         - name: user-tmp-volume
           path: /var/tmp/user
@@ -86,6 +86,13 @@ commands:
         codex_bin="$node_bin_dir/codex"
 
         test -x "$codex_bin"
+
+        # Symlink node/npm/npx into the front-of-PATH bin dir so SSH
+        # sessions and future nvm patch-version bumps never break
+        # resolution of "node" via the codex script's shebang.
+        ln -sf "$node_bin_dir/node" /var/tmp/user/bin/node
+        ln -sf "$node_bin_dir/npm" /var/tmp/user/bin/npm
+        ln -sf "$node_bin_dir/npx" /var/tmp/user/bin/npx
 
         # Use a wrapper instead of a symlink so that the Codex app server
         # uses the persistent home directory.
